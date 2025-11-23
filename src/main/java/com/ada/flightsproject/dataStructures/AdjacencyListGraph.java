@@ -124,4 +124,104 @@ public class AdjacencyListGraph<T> {
     }
 
     /* Djikstra's, Bellman-Ford, DAG Shortest Path, A* algorithm */
+
+    /**
+     * Bellman-Ford shortest path from source to destination.
+     *
+     * @param source      starting node
+     * @param destination target node
+     * @return list of nodes representing the shortest path from source to destination
+     *         (including both ends), or null if destination is unreachable.
+     * @throws IllegalArgumentException if source or destination is not in the graph
+     * @throws IllegalStateException    if a negative-weight cycle is reachable from source
+     */
+    public List<T> bellmanFord(T source, T destination) {
+        if (!adj.containsKey(source) || !adj.containsKey(destination)) {
+            throw new IllegalArgumentException("Source or destination not in graph");
+        }
+
+        // Distance and predecessor maps
+        Map<T, Double> dist = new HashMap<>();
+        Map<T, T> prev = new HashMap<>();
+
+        // 1. Initialize distances
+        for (T node : adj.keySet()) {
+            dist.put(node, Double.POSITIVE_INFINITY);
+        }
+        dist.put(source, 0.0);
+
+        int V = adj.size();
+
+        // 2. Relax all edges |V| - 1 times
+        for (int i = 0; i < V - 1; i++) {
+            boolean updated = false;
+
+            for (Map.Entry<T, List<Edge<T>>> entry : adj.entrySet()) {
+                T u = entry.getKey();
+                double du = dist.get(u);
+                if (du == Double.POSITIVE_INFINITY) continue; // unreachable so far
+
+                for (Edge<T> e : entry.getValue()) {
+                    T v = e.to;
+                    double nd = du + e.weight;
+
+                    double current = dist.getOrDefault(v, Double.POSITIVE_INFINITY);
+                    if (nd < current) {
+                        dist.put(v, nd);
+                        prev.put(v, u);
+                        updated = true;
+                    }
+                }
+            }
+
+            // Early stop if no update in this pass
+            if (!updated) break;
+        }
+
+        // 3. Check for negative-weight cycles reachable from source
+        for (Map.Entry<T, List<Edge<T>>> entry : adj.entrySet()) {
+            T u = entry.getKey();
+            double du = dist.get(u);
+            if (du == Double.POSITIVE_INFINITY) continue;
+
+            for (Edge<T> e : entry.getValue()) {
+                T v = e.to;
+                double nd = du + e.weight;
+                if (nd < dist.getOrDefault(v, Double.POSITIVE_INFINITY)) {
+                    throw new IllegalStateException(
+                            "Graph contains a negative-weight cycle reachable from the source");
+                }
+            }
+        }
+
+        // 4. Reconstruct path from source to destination
+        if (Double.isInfinite(dist.get(destination))) {
+            // unreachable
+            return null;
+        }
+
+        List<T> path = new ArrayList<>();
+        T cur = destination;
+        while (cur != null) {
+            path.add(0, cur); // prepend
+            cur = prev.get(cur);
+        }
+
+        return path;
+    }
+
+    public Double bellmanFordDistance(T source, T destination) {
+        List<T> path = bellmanFord(source, destination);
+        if (path == null) return Double.POSITIVE_INFINITY;
+
+        double total = 0.0;
+        for (int i = 0; i < path.size() - 1; i++) {
+            Double w = getWeight(path.get(i), path.get(i + 1));
+            if (w == null) return Double.POSITIVE_INFINITY; // should not happen
+            total += w;
+        }
+        return total;
+    }
+
+
 }
