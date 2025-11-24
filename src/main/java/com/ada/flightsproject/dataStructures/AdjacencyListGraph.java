@@ -94,19 +94,23 @@ public class AdjacencyListGraph<T> {
     }
 
     /**
-     * Check if an edge u -> v exists, and return its weight if yes.
-     * Returns null if no such edge.
+     * Get all flights u -> v as (duration, departureTime) pairs.
+     * Returns an empty list if no such edge.
      */
-    public Integer getWeight(T from, T to) {
+    public List<Map.Entry<Integer, Integer>> getDurations(T from, T to) {
+        List<Map.Entry<Integer, Integer>> result = new ArrayList<>();
         List<Edge<T>> edges = adj.get(from);
-        if (edges == null) return null;
+        if (edges == null) return result;
+
         for (Edge<T> e : edges) {
             if (e.to.equals(to)) {
-                return e.duration;
+                // key = duration, value = departureTime
+                result.add(new AbstractMap.SimpleEntry<>(e.duration, e.departureTime));
             }
         }
-        return null;
+        return result;
     }
+
 
     /**
      * Get all nodes currently in the graph.
@@ -115,7 +119,7 @@ public class AdjacencyListGraph<T> {
         return adj.keySet();
     }
 
-    /* Djikstra's */
+    /* Dijkstra's */
 
 
 }
