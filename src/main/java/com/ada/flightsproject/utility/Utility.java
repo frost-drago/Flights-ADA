@@ -68,12 +68,12 @@ public class Utility {
     };
 
     /**
-     * Converts minutes into two strings: day and hh:mm
+     * Converts minutes into two strings: day and HH:mm.
      *
-     * @param weekMinute
-     * @return
+     * @param weekMinute duration from Monday midnight in minutes
+     * @return String[]{ dayName, timeHHMM}
      */
-    public static String[] minutesToDayAndTime(int weekMinute) {
+    public static String[] computeMinutesToDayAndTime(int weekMinute) {
         // Normalize into the 0–10079 range to get the weekday and time-of-day
         int normalized = ((weekMinute % MINUTES_IN_WEEK) + MINUTES_IN_WEEK) % MINUTES_IN_WEEK;
 

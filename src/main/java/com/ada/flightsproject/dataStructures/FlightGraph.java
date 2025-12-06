@@ -81,7 +81,16 @@ public class FlightGraph {
     /**
      * Earliest-arrival Dijkstra assuming:
      * - startTime is also in "minutes from start of week"
-     * - flights repeat weekly (capped at 2 weeks)
+     * - flights repeat weekly
+     * “If I start at source at time startTime (minutes from start of week),
+     * and flights repeat every week, and I must wait at least minLayover minutes before boarding each next flight,
+     * what is the earliest time I can reach target, within 2 weeks?”
+     *
+     * @param source starting airport code
+     * @param target target airport code
+     * @param startTime starting time in weekMinutes
+     * @param minLayover minutes of layover (from my arrival to the next departure, how long do I need my buffer time?)
+     * @return Result {airports, flights, arrivalTime}
      */
     public Result earliestArrival(String source, String target, int startTime, int minLayover) {
         final int MINUTES_IN_DAY = 24 * 60;

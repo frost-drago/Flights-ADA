@@ -18,7 +18,7 @@ public class Main {
 
         // t2[0] = day
         // t2[1] = HH:MM
-        String[] t2 = Utility.minutesToDayAndTime(1570);
+        String[] t2 = Utility.computeMinutesToDayAndTime(1570);
         System.out.println(t2[0] + " " + t2[1]);
 
         FlightGraph graph = new FlightGraph();
@@ -37,8 +37,8 @@ public class Main {
             System.out.println("Airports: " + r.airports);
             for (FlightGraph.Flight f : r.flights) {
                 System.out.println(f.from + " -> " + f.to
-                        + " depart= " + Utility.minutesToDayAndTime(f.depart)[0] + " " + Utility.minutesToDayAndTime(f.depart)[1]
-                        + " | arrive= " + Utility.minutesToDayAndTime(f.arrive)[0] + " " + Utility.minutesToDayAndTime(f.arrive)[1]);
+                        + " depart= " + Utility.computeMinutesToDayAndTime(f.depart)[0] + " " + Utility.computeMinutesToDayAndTime(f.depart)[1]
+                        + " | arrive= " + Utility.computeMinutesToDayAndTime(f.arrive)[0] + " " + Utility.computeMinutesToDayAndTime(f.arrive)[1]);
             }
         }
 
