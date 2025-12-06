@@ -19,6 +19,11 @@ public class FlightGraph {
         }
     }
 
+    /* Flights from
+     * "CGK" -> [Flight(CGK->SIN), Flight(CGK->KUL), Flight(CGK->DPS)]
+     * "SIN" -> [Flight(SIN->SYD), Flight(SIN->NRT)]
+     * "DPS" -> [Flight(DPS->PER)]
+     */
     private final Map<String, List<Flight>> flightsFrom = new HashMap<>();
 
     /**
@@ -101,64 +106,81 @@ public class FlightGraph {
         Map<String, String> prevAirport = new HashMap<>();
         Map<String, Flight> prevFlight = new HashMap<>();
 
-        // Initialize known airports with INF
+        // Initialize known airports with INFINITY
         for (String airport : flightsFrom.keySet()) {
             bestTime.put(airport, Integer.MAX_VALUE);
         }
         bestTime.put(source, startTime);
 
+        // We are currently at airport at time, and we want to explore where we can go from here.
         class State {
             String airport;
             int time;
             State(String airport, int time) { this.airport = airport; this.time = time; }
         }
-
-        PriorityQueue<State> pq = new PriorityQueue<>(Comparator.comparingInt(s -> s.time));
+        PriorityQueue<State> pq = new PriorityQueue<>(Comparator.comparingInt(s -> s.time)); // Take a State object called s, and return s.time.
         pq.add(new State(source, startTime));
 
+        // The main Dijkstra loop
         while (!pq.isEmpty()) {
-            State cur = pq.poll();
+            State cur = pq.poll(); //retrieves and removes the element at the head of the queue
             String u = cur.airport;
             int time = cur.time;
 
-            // If we already found a better time for this airport, skip
+            // If the state we popped has a time worse than what we already recorded for that airport → discard.
             if (time > bestTime.getOrDefault(u, Integer.MAX_VALUE)) continue;
             // If we already exceed our 2-week cap, stop exploring from here
             if (time > MAX_TIME) continue;
             // Early exit: earliest arrival at target found
-            if (u.equals(target)) break;
+            if (u.equals(target)) break; // If u == target → we popped the earliest possible arrival at the target → done.
 
+            // Give me the list of flights that depart from airport u.
+            // If u has no outgoing flights, just return an empty list instead of null.
             List<Flight> outgoing = flightsFrom.getOrDefault(u, Collections.emptyList());
+            // We iterate over all outgoing flights from u
             for (Flight f : outgoing) {
                 // Base departure within a week (0..WEEK-1)
                 int depBase = f.depart % WEEK;
                 int flightDuration = f.arrive - f.depart; // should be > 0
 
+                // When are we allowed to depart next?
                 // We need to respect layover from current time
                 int earliestAllowed = time + minLayover;
+                // EXAMPLE. If earliestAllowed is Monday 10:30 in week 3:
+                // - allowedWeekStart = Monday 00:00 of week 3
+                // - allowedMod = 10:30 in minutes
                 int allowedMod = earliestAllowed % WEEK;
                 int allowedWeekStart = earliestAllowed - allowedMod;
 
+                // Decide whether we catch it this week or next week
                 int candidateDep;
                 if (depBase >= allowedMod) {
                     // catch it in this weekly cycle
+                    // EXAMPLE.
+                    // Flight: Wednesday 14:00
+                    // depBase = Wed 14:00
+                    // earliestAllowed = Wed 13:00 → allowedMod = Wed 13:00
+                    // depBase >= allowedMod → we can catch this same week → candidateDep is weekStart + Wed 14:00.
                     candidateDep = allowedWeekStart + depBase;
                 } else {
                     // need to wait until next week's occurrence
                     candidateDep = allowedWeekStart + WEEK + depBase;
                 }
-
+                // If the earliest flight we can catch is already beyond our allowed window, we discard this edge.
                 if (candidateDep > MAX_TIME) {
                     // Too far in future
                     continue;
                 }
 
+                // Compute arrival time for this instance of the flight
                 int candidateArr = candidateDep + flightDuration;
                 if (candidateArr > MAX_TIME) {
                     // Arrival past our 2-week window
                     continue;
                 }
 
+                // If going from u to f.to via this flight results in an arrival time better than the best we have for f.to,
+                // ... update and push to PQ.
                 if (candidateArr < bestTime.getOrDefault(f.to, Integer.MAX_VALUE)) {
                     bestTime.put(f.to, candidateArr);
                     prevAirport.put(f.to, u);
@@ -172,6 +194,7 @@ public class FlightGraph {
             }
         }
 
+        // When we’re done: check if we reached target
         int finalTime = bestTime.getOrDefault(target, Integer.MAX_VALUE);
         if (finalTime == Integer.MAX_VALUE) {
             return new Result(Collections.emptyList(), Collections.emptyList(), Integer.MAX_VALUE);
@@ -180,7 +203,6 @@ public class FlightGraph {
         // reconstruct path: airports + flights
         List<String> airportPath = new ArrayList<>();
         List<Flight> usedFlights = new ArrayList<>();
-
         String curAirport = target;
         while (curAirport != null) {
             airportPath.add(curAirport);
@@ -190,7 +212,6 @@ public class FlightGraph {
             }
             curAirport = prevAirport.get(curAirport);
         }
-
         Collections.reverse(airportPath);
         Collections.reverse(usedFlights);
 
