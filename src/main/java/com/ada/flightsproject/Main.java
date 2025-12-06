@@ -1,18 +1,8 @@
 package com.ada.flightsproject;
 
-import com.ada.flightsproject.dataStructures.FlightGraph;
-import com.ada.flightsproject.model.Airport;
 import com.ada.flightsproject.utility.Utility;
-
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.List;
-
-
+import com.ada.flightsproject.dataStructures.FlightGraph;
+import com.ada.flightsproject.data.FlightGraphLoader;
 
 /*
     For command line stuff and testing
@@ -33,7 +23,17 @@ public class Main {
 
         FlightGraph graph = new FlightGraph();
 
+        FlightGraphLoader.loadFlights(
+                graph,
+                "/com/ada/flightsproject/data/FlightPathData.csv"
+        );
 
+        System.out.println("Loaded all flights!");
+
+        // Now you can run searches:
+        int startTime = Utility.computeDepartureArrivalMinutes("Monday", "08:00", 0)[0];
+        FlightGraph.Result a = graph.earliestArrival("CGK", "SYD", startTime, 60);
+        System.out.println("Arrives at: " + a.arrivalTime);
 
     }
 }

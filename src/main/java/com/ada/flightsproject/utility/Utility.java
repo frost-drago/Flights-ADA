@@ -68,6 +68,7 @@ public class Utility {
     };
 
     /**
+     * Converts minutes into two strings: day and hh:mm
      *
      * @param weekMinute
      * @return
