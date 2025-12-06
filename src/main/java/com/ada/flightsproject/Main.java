@@ -16,24 +16,32 @@ public class Main {
         System.out.println("Dep: " + t[0]);
         System.out.println("Arr: " + t[1]);
 
-        // r[0] = day
-        // r[1] = HH:MM
-        String[] r = Utility.minutesToDayAndTime(1570);
-        System.out.println(r[0] + " " + r[1]);
+        // t2[0] = day
+        // t2[1] = HH:MM
+        String[] t2 = Utility.minutesToDayAndTime(1570);
+        System.out.println(t2[0] + " " + t2[1]);
 
         FlightGraph graph = new FlightGraph();
 
-        FlightGraphLoader.loadFlights(
-                graph,
-                "/com/ada/flightsproject/data/FlightPathData.csv"
-        );
+        FlightGraphLoader.loadFlights(graph, "/com/ada/flightsproject/data/FlightPathData.csv");
 
         System.out.println("Loaded all flights!");
 
         // Now you can run searches:
-        int startTime = Utility.computeDepartureArrivalMinutes("Monday", "08:00", 0)[0];
-        FlightGraph.Result a = graph.earliestArrival("CGK", "SYD", startTime, 60);
-        System.out.println("Arrives at: " + a.arrivalTime);
+        int start = Utility.computeDepartureArrivalMinutes("Monday", "08:00", 0)[0];
+        FlightGraph.Result r = graph.earliestArrival("KUL", "KIX", start, 60);
+
+        if (r.arrivalTime == Integer.MAX_VALUE) {
+            System.out.println("No route found.");
+        } else {
+            System.out.println("Airports: " + r.airports);
+            for (FlightGraph.Flight f : r.flights) {
+                System.out.println(f.from + " -> " + f.to
+                        + " depart= " + Utility.minutesToDayAndTime(f.depart)[0] + " " + Utility.minutesToDayAndTime(f.depart)[1]
+                        + " | arrive= " + Utility.minutesToDayAndTime(f.arrive)[0] + " " + Utility.minutesToDayAndTime(f.arrive)[1]);
+            }
+        }
+
 
     }
 }

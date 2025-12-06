@@ -5,11 +5,11 @@ import java.util.*;
 
 public class FlightGraph {
 
-    static class Flight {
-        String from;
-        String to;
-        int depart; // minutes from start of week
-        int arrive; // minutes from start of week
+    public static class Flight {
+        public String from;
+        public String to;
+        public int depart; // minutes from start of week
+        public int arrive; // minutes from start of week
 
         Flight(String from, String to, int depart, int arrive) {
             this.from = from;
@@ -62,24 +62,35 @@ public class FlightGraph {
         addFlight(startingAirport, destinationAirport, departWeekMinute, arriveWeekMinute);
     }
 
+    /*
+     * Just the result table, nothing much.
+     */
     public static class Result {
-        public final List<String> path;
-        public final int arrivalTime;
+        public final List<String> airports;   // sequence of airports
+        public final List<Flight> flights;    // sequence of flights actually used
+        public final int arrivalTime;         // final arrival time in minutes
 
-        Result(List<String> path, int arrivalTime) {
-            this.path = path;
+        Result(List<String> airports, List<Flight> flights, int arrivalTime) {
+            this.airports = airports;
+            this.flights = flights;
             this.arrivalTime = arrivalTime;
         }
     }
 
+
     /**
-     * Simple earliest-arrival Dijkstra assuming:
+     * Earliest-arrival Dijkstra assuming:
      * - startTime is also in "minutes from start of week"
-     * - flights do NOT repeat weekly (that’s the next upgrade)
+     * - flights repeat weekly (capped at 2 weeks)
      */
     public Result earliestArrival(String source, String target, int startTime, int minLayover) {
+        final int MINUTES_IN_DAY = 24 * 60;
+        final int WEEK = 7 * MINUTES_IN_DAY;
+        final int MAX_TIME = startTime + 2 * WEEK; // cap search to 2 weekly cycles
+
         Map<String, Integer> bestTime = new HashMap<>();
-        Map<String, String> prev = new HashMap<>();
+        Map<String, String> prevAirport = new HashMap<>();
+        Map<String, Flight> prevFlight = new HashMap<>();
 
         // Initialize known airports with INF
         for (String airport : flightsFrom.keySet()) {
@@ -101,44 +112,80 @@ public class FlightGraph {
             String u = cur.airport;
             int time = cur.time;
 
+            // If we already found a better time for this airport, skip
             if (time > bestTime.getOrDefault(u, Integer.MAX_VALUE)) continue;
+            // If we already exceed our 2-week cap, stop exploring from here
+            if (time > MAX_TIME) continue;
+            // Early exit: earliest arrival at target found
             if (u.equals(target)) break;
 
             List<Flight> outgoing = flightsFrom.getOrDefault(u, Collections.emptyList());
             for (Flight f : outgoing) {
-                // Can only catch flights departing after we arrive + layover
-                if (f.depart >= time + minLayover) {
-                    int newTime = f.arrive;
-                    if (newTime < bestTime.getOrDefault(f.to, Integer.MAX_VALUE)) {
-                        bestTime.put(f.to, newTime);
-                        prev.put(f.to, u);
-                        pq.add(new State(f.to, newTime));
-                    }
+                // Base departure within a week (0..WEEK-1)
+                int depBase = f.depart % WEEK;
+                int flightDuration = f.arrive - f.depart; // should be > 0
+
+                // We need to respect layover from current time
+                int earliestAllowed = time + minLayover;
+                int allowedMod = earliestAllowed % WEEK;
+                int allowedWeekStart = earliestAllowed - allowedMod;
+
+                int candidateDep;
+                if (depBase >= allowedMod) {
+                    // catch it in this weekly cycle
+                    candidateDep = allowedWeekStart + depBase;
+                } else {
+                    // need to wait until next week's occurrence
+                    candidateDep = allowedWeekStart + WEEK + depBase;
+                }
+
+                if (candidateDep > MAX_TIME) {
+                    // Too far in future
+                    continue;
+                }
+
+                int candidateArr = candidateDep + flightDuration;
+                if (candidateArr > MAX_TIME) {
+                    // Arrival past our 2-week window
+                    continue;
+                }
+
+                if (candidateArr < bestTime.getOrDefault(f.to, Integer.MAX_VALUE)) {
+                    bestTime.put(f.to, candidateArr);
+                    prevAirport.put(f.to, u);
+
+                    // Store the actual instance of the flight we used, with
+                    // the concrete departure/arrival time for this occurrence.
+                    prevFlight.put(f.to, new Flight(f.from, f.to, candidateDep, candidateArr));
+
+                    pq.add(new State(f.to, candidateArr));
                 }
             }
         }
 
         int finalTime = bestTime.getOrDefault(target, Integer.MAX_VALUE);
         if (finalTime == Integer.MAX_VALUE) {
-            return new Result(Collections.emptyList(), Integer.MAX_VALUE);
+            return new Result(Collections.emptyList(), Collections.emptyList(), Integer.MAX_VALUE);
         }
 
-        // reconstruct path of airports
-        List<String> path = new ArrayList<>();
-        String cur = target;
-        while (cur != null) {
-            path.add(cur);
-            cur = prev.get(cur);
+        // reconstruct path: airports + flights
+        List<String> airportPath = new ArrayList<>();
+        List<Flight> usedFlights = new ArrayList<>();
+
+        String curAirport = target;
+        while (curAirport != null) {
+            airportPath.add(curAirport);
+            Flight used = prevFlight.get(curAirport);
+            if (used != null) {
+                usedFlights.add(used);
+            }
+            curAirport = prevAirport.get(curAirport);
         }
-        Collections.reverse(path);
 
-        return new Result(path, finalTime);
-    }
+        Collections.reverse(airportPath);
+        Collections.reverse(usedFlights);
 
-    // Might still be useful elsewhere.
-    int toMinutes(String hhmm) {
-        String[] parts = hhmm.split(":");
-        return Integer.parseInt(parts[0]) * 60 + Integer.parseInt(parts[1]);
+        return new Result(airportPath, usedFlights, finalTime);
     }
 
 }
