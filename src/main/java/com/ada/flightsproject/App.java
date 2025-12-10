@@ -17,7 +17,7 @@ public class App extends Application {
         FlightGraph graph = new FlightGraph();
         FlightGraphLoader.loadFlights(graph, "/com/ada/flightsproject/data/FlightPathData.csv");
 
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("MainView.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("views/MainView.fxml"));
         Parent root = loader.load();
 
         // Provide the graph to controller
