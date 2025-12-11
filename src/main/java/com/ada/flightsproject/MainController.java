@@ -94,7 +94,9 @@ public class MainController {
         String src = sourceCombo.getValue();
         String dst = destCombo.getValue();
         String day = dayCombo.getValue();
-        
+        String time = (departTimeField != null && departTimeField.getText() != null)
+                ? departTimeField.getText().trim()
+                : "";
 
         if (src == null || dst == null || day == null) {
             summaryLabel.setText("Please fill all inputs (From, To, Day).");
@@ -104,13 +106,22 @@ public class MainController {
             summaryLabel.setText("Source and destination cannot be the same.");
             return;
         }
+        // If user leaves time empty, default to midnight
+        if (time.isEmpty()) {
+            time = "00:00";
+        }
 
         // Start at midnight of selected day (user does not type time)
         int startTime;
         try {
-            startTime = Utility.computeDepartureArrivalMinutes(day, "00:00", 0)[0];
+            // duration=0, we only care about the departure component
+            startTime = Utility.computeDepartureArrivalMinutes(day, time, 0)[0];
+        } catch (IllegalArgumentException ex) {
+            // Bad time format or invalid day string
+            summaryLabel.setText("Invalid departure time. Use HH:MM, e.g. 09:30.");
+            return;
         } catch (Exception ex) {
-            summaryLabel.setText("Internal time convert error.");
+            summaryLabel.setText("Internal time conversion error.");
             return;
         }
 
@@ -119,8 +130,13 @@ public class MainController {
         // disable UI while searching
         searchButton.setDisable(true);
         resetButton.setDisable(true);
+        if (seeAllFlightsButton != null) {
+            seeAllFlightsButton.setDisable(true);
+        }
         summaryLabel.setText("Searching...");
-        if (progressIndicator != null) progressIndicator.setVisible(true);
+        if (progressIndicator != null) {
+            progressIndicator.setVisible(true);
+        }
 
         Task<FlightGraph.Result> task = new Task<>() {
             @Override
@@ -134,6 +150,9 @@ public class MainController {
             if (progressIndicator != null) progressIndicator.setVisible(false);
             searchButton.setDisable(false);
             resetButton.setDisable(false);
+            if (seeAllFlightsButton != null) {
+                seeAllFlightsButton.setDisable(false);
+            }
 
             if (res == null || res.arrivalTime == Integer.MAX_VALUE) {
                 summaryLabel.setText("No route found.");
@@ -148,8 +167,12 @@ public class MainController {
             if (progressIndicator != null) progressIndicator.setVisible(false);
             searchButton.setDisable(false);
             resetButton.setDisable(false);
-            summaryLabel.setText("Search failed: " + (task.getException() != null ? task.getException().getMessage() : "unknown"));
-            if (task.getException() != null) task.getException().printStackTrace();
+            if (seeAllFlightsButton != null) {
+                seeAllFlightsButton.setDisable(false);
+            }
+            Throwable ex = task.getException();
+            summaryLabel.setText("Search failed: " + (ex != null ? ex.getMessage() : "unknown"));
+            if (ex != null) ex.printStackTrace();
         });
 
         Thread t = new Thread(task, "dijkstra-search");
