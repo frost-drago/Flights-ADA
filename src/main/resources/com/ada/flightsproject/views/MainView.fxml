@@ -7,38 +7,89 @@
 <?import javafx.scene.control.Spinner?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
 
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+            prefHeight="600.0" prefWidth="1000.0"
+            xmlns="http://javafx.com/javafx/25"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.ada.flightsproject.MainController">
+    <children>
+        <HBox alignment="TOP_CENTER"
+              layoutX="59.0" layoutY="77.0"
+              prefHeight="72.0" prefWidth="200.0"
+              spacing="8.0"
+              AnchorPane.leftAnchor="0.0"
+              AnchorPane.rightAnchor="0.0"
+              AnchorPane.topAnchor="0.0">
+            <padding>
+                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+            </padding>
+            <children>
+                <Label text="From" />
+                <ComboBox fx:id="sourceCombo" prefWidth="180.0" promptText="sourceCombo" HBox.hgrow="ALWAYS" />
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.ada.flightsproject.MainController">
-   <children>
-      <HBox alignment="TOP_CENTER" layoutX="59.0" layoutY="77.0" prefHeight="72.0" prefWidth="200.0" spacing="8.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-         <padding>
-            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-         </padding>
-         <children>
-            <Label text="From" />
-            <ComboBox fx:id="sourceCombo" prefWidth="180.0" promptText="sourceCombo" HBox.hgrow="ALWAYS" />
-            <Label text="To" />
-            <ComboBox fx:id="destCombo" prefWidth="180.0" promptText="destCombo" HBox.hgrow="ALWAYS" />
-            <Label text="Day:" />
-            <ComboBox fx:id="dayCombo" prefWidth="120.0" promptText="dayCombo" HBox.hgrow="NEVER" />
-            <Label text="Layover (min)" />
-            <Spinner fx:id="layoverSpinner" prefWidth="100.0" HBox.hgrow="NEVER" />
-            <Button fx:id="searchButton" mnemonicParsing="false" onAction="#onSearchClicked" prefWidth="130.0" text="Find Best Route" />
-            <Button fx:id="resetButton" mnemonicParsing="false" onAction="#onResetClicked" prefWidth="80.0" text="Reset" />
-         </children>
-      </HBox>
-      <TableView fx:id="resultsTable" layoutX="268.0" layoutY="108.0" prefHeight="200.0" prefWidth="420.0" AnchorPane.bottomAnchor="60.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="82.0">
-        <columns>
-          <TableColumn fx:id="colFrom" prefWidth="120.0" text="From" />
-          <TableColumn fx:id="colTo" prefWidth="120.0" text="To" />
-            <TableColumn fx:id="colDepart" prefWidth="220.0" text="Depart" />
-            <TableColumn fx:id="colArrive" prefWidth="220.0" text="Arrive" />
-            <TableColumn fx:id="colDuration" prefWidth="120.0" text="Duration" />
-        </columns>
-      </TableView>
-      <Label fx:id="summaryLabel" alignment="BOTTOM_LEFT" layoutX="154.0" layoutY="548.0" prefHeight="40.0" prefWidth="360.0" text="Ready" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" />
-   </children>
+                <Label text="To" />
+                <ComboBox fx:id="destCombo" prefWidth="180.0" promptText="destCombo" HBox.hgrow="ALWAYS" />
+
+                <Label text="Day:" />
+                <ComboBox fx:id="dayCombo" prefWidth="120.0" promptText="dayCombo" HBox.hgrow="NEVER" />
+
+                <!-- New departure time field -->
+                <Label text="Depart (HH:MM)" />
+                <TextField fx:id="departTimeField"
+                           promptText="e.g. 09:30"
+                           prefWidth="80.0"
+                           HBox.hgrow="NEVER" />
+
+                <Label text="Layover (min)" />
+                <Spinner fx:id="layoverSpinner" prefWidth="100.0" HBox.hgrow="NEVER" />
+
+                <Button fx:id="searchButton"
+                        mnemonicParsing="false"
+                        onAction="#onSearchClicked"
+                        prefWidth="130.0"
+                        text="Find Best Route" />
+
+                <!-- New 'See All Flights' button -->
+                <Button fx:id="seeAllFlightsButton"
+                        mnemonicParsing="false"
+                        onAction="#onSeeAllFlightsClicked"
+                        prefWidth="120.0"
+                        text="See All Flights" />
+
+                <Button fx:id="resetButton"
+                        mnemonicParsing="false"
+                        onAction="#onResetClicked"
+                        prefWidth="80.0"
+                        text="Reset" />
+            </children>
+        </HBox>
+
+        <TableView fx:id="resultsTable"
+                   layoutX="268.0" layoutY="108.0"
+                   prefHeight="200.0" prefWidth="420.0"
+                   AnchorPane.bottomAnchor="60.0"
+                   AnchorPane.leftAnchor="10.0"
+                   AnchorPane.rightAnchor="10.0"
+                   AnchorPane.topAnchor="82.0">
+            <columns>
+                <TableColumn fx:id="colFrom" prefWidth="120.0" text="From" />
+                <TableColumn fx:id="colTo" prefWidth="120.0" text="To" />
+                <TableColumn fx:id="colDepart" prefWidth="220.0" text="Depart" />
+                <TableColumn fx:id="colArrive" prefWidth="220.0" text="Arrive" />
+                <TableColumn fx:id="colDuration" prefWidth="120.0" text="Duration" />
+            </columns>
+        </TableView>
+
+        <Label fx:id="summaryLabel"
+               alignment="BOTTOM_LEFT"
+               layoutX="154.0" layoutY="548.0"
+               prefHeight="40.0" prefWidth="360.0"
+               text="Ready"
+               AnchorPane.bottomAnchor="10.0"
+               AnchorPane.leftAnchor="10.0" />
+    </children>
 </AnchorPane>

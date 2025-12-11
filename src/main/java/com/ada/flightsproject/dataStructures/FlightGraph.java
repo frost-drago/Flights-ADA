@@ -67,6 +67,14 @@ public class FlightGraph {
         addFlight(startingAirport, destinationAirport, departWeekMinute, arriveWeekMinute);
     }
 
+    public Collection<Flight> getAllFlights() {
+        List<Flight> all = new ArrayList<>();
+        for (List<Flight> list : flightsFrom.values()) {
+            all.addAll(list);
+        }
+        return all;
+    }
+
     /*
      * Just the result table, nothing much.
      */

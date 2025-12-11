@@ -4,7 +4,10 @@ import com.ada.flightsproject.dataStructures.FlightGraph;
 import com.ada.flightsproject.dataStructures.FlightGraph.Flight;
 import com.ada.flightsproject.utility.Utility;
 import javafx.application.Platform;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 
@@ -18,6 +21,8 @@ public class MainController {
     @FXML private Spinner<Integer> layoverSpinner;
     @FXML private Button searchButton;
     @FXML private Button resetButton;
+    @FXML private TextField departTimeField;
+    @FXML private Button seeAllFlightsButton;
 
     @FXML private TableView<FlightRow> resultsTable;
     @FXML private TableColumn<FlightRow, String> colFrom;
@@ -89,6 +94,7 @@ public class MainController {
         String src = sourceCombo.getValue();
         String dst = destCombo.getValue();
         String day = dayCombo.getValue();
+        
 
         if (src == null || dst == null || day == null) {
             summaryLabel.setText("Please fill all inputs (From, To, Day).");
@@ -149,6 +155,44 @@ public class MainController {
         Thread t = new Thread(task, "dijkstra-search");
         t.setDaemon(true);
         t.start();
+    }
+
+    @FXML
+    private void onSeeAllFlightsClicked(ActionEvent event) {
+        if (graph == null) {
+            // Safety: graph not loaded
+            summaryLabel.setText("Graph not loaded.");
+            return;
+        }
+
+        // Collect all flights from the graph
+        ObservableList<FlightRow> rows = FXCollections.observableArrayList();
+
+        for (Flight f : graph.getAllFlights()) {
+            // Depart / arrive in week-minutes -> (Day, HH:MM)
+            String[] dep = Utility.computeMinutesToDayAndTime(f.depart);
+            String[] arr = Utility.computeMinutesToDayAndTime(f.arrive);
+
+            String departStr = dep[0] + " " + dep[1];  // e.g. "Monday 09:30"
+            String arriveStr = arr[0] + " " + arr[1];  // e.g. "Monday 13:45"
+
+            int durationMinutes = f.arrive - f.depart;
+            String durationStr = durationMinutes + " min";
+
+            rows.add(new FlightRow(
+                    f.from,
+                    f.to,
+                    departStr,
+                    arriveStr,
+                    durationStr
+            ));
+        }
+
+        // Optionally sort by departure time
+        rows.sort((a, b) -> a.depart.compareTo(b.depart));
+
+        resultsTable.getItems().setAll(rows);
+        summaryLabel.setText("Showing all " + rows.size() + " flights");
     }
 
     private void displayResult(FlightGraph.Result res) {
