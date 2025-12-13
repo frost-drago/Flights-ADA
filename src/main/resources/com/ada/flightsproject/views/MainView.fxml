@@ -15,7 +15,8 @@
             prefHeight="600.0" prefWidth="1000.0"
             xmlns="http://javafx.com/javafx/25"
             xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="com.ada.flightsproject.MainController">
+            fx:controller="com.ada.flightsproject.MainController"
+            stylesheets="@../css/flightstyle.css">
     <children>
         <HBox alignment="TOP_CENTER"
               layoutX="59.0" layoutY="77.0"
