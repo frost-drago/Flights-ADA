@@ -1,20 +1,21 @@
 # Flights (Algorithm design and analysis)
 
-# FlightsProject – UI / CSS Guide
-
-You **do not** need to write Java code for this task.  
-Your job = **make the app look nice using JavaFX CSS**.
+This project implements a modified Dijkstra algorithm to compute the earliest possible 
+arrival time between airports under flight time constraints.
 
 ---
 
-## 1. What this project is
-
-A JavaFX desktop app that shows flight data.  
-The Java and loading logic already work – you only touch **CSS** and maybe FXML labels/layout if needed.
+## 1. How to run the file
+1. Open project in IntelliJ
+2. IntelliJ should detect it as a Maven project and index it.
+3. Click Reload all Maven projects
+4. Run App.java
+5. Use GUI to input source, destination, and departure day/time
+6. View earliest arrival result in table
 
 ---
 
-## 2. Project structure (what you care about)
+## 2. Project structure
 
 ```text
 FlightsProject
@@ -28,46 +29,18 @@ FlightsProject
    │  │     │  └─ FlightGraph.java
    │  │     ├─ utility
    │  │     │  └─ Utility.java
-   │  │     ├─ App.java        <-- JavaFX entry point (starts the UI)
+   │  │     ├─ App.java        <-- JavaFX entry point (starts the UI). Please run this one
+   │  │     ├─ FlightRow.java
    │  │     ├─ Main.java       <-- testing out code
    │  │     └─ MainController.java
    │  └─ resources
    │     └─ com.ada.flightsproject
    │        ├─ css
-   │        │  └─ (put your stylesheets here)
+   │        │  └─ flightstyle.css
    │        ├─ data
    │        │  └─ FlightPathData.csv
    │        └─ views
    │           └─ MainView.fxml <-- main UI layout
 └─ pom.xml (Maven)
 ```
-You will mainly use:
-
-- src/main/resources/com/ada/flightsproject/css/ – your CSS files
-
-- src/main/resources/com/ada/flightsproject/views/MainView.fxml – layout & IDs/classes
-
-- src/main/java/com/ada/flightsproject/App.java – used only to run the app
-
-## 3. Setup (IntelliJ)
-
-1. Install JDK 21+ (or whatever version the project uses).
-
-2. Open IntelliJ IDEA → File > Open... → select the FlightsProject folder (the one with pom.xml).
-
-3. IntelliJ should detect it as a Maven project and index it.
-
-4. Wait until the Maven import finishes (look at the bottom status bar).
-
-5. If IntelliJ asks to “Download Maven dependencies”, say yes.
-
-## 4. How to run the app
-
-1. In the Project panel, open
-src/main/java/com/ada/flightsproject/App.java
-
-2. Right-click the App file → Run 'App.main()'
-or click the green ▶ icon next to the main method.
-
-3. A window should appear – this is the JavaFX UI you’ll style.
 
