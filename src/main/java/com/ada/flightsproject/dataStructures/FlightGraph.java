@@ -151,7 +151,7 @@ public class FlightGraph {
                 int depBase = f.depart % WEEK;
                 int flightDuration = f.arrive - f.depart; // should be > 0
 
-                // When are we allowed to depart next?
+                // When are we allowed to depart next
                 // We need to respect layover from current time
                 int earliestAllowed = time + minLayover;
                 // EXAMPLE. If earliestAllowed is Monday 10:30 in week 3:
